@@ -58,7 +58,7 @@ class Course(models.Model):
         ordering = ['slug']
 
 class Offering(models.Model):
-
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     course = models.ForeignKey(
         Course,
         on_delete=models.CASCADE,
@@ -164,7 +164,7 @@ class Team(models.Model):
         ]
 
 class Enrollment(models.Model):
-
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,

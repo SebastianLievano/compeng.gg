@@ -162,6 +162,7 @@ def dashboard(request):
     for enrollment in user.enrollment_set.all():
         offering = enrollment.role.offering
         offerings.append({
+            'id': str(offering.id),
             'name': str(offering),
             'slug': offering.course.slug,
             'role': str(enrollment.role),
@@ -286,6 +287,7 @@ def offerings(request):
             'name': str(offering),
             'slug': offering.course.slug,
             'role': str(enrollment.role),
+            'enrollment_id': str(enrollment.id)
         })
     return Response(offerings)
 

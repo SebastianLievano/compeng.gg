@@ -1,22 +1,8 @@
 import courses.models as db
 import pytest
 from django.contrib.auth.models import User
-from datetime import datetime, timedelta
 from django.db import IntegrityError, transaction
-from django.conf import settings
-
-
-def create_offering() -> db.Offering:
-    intitution = db.Institution.objects.create()
-    course = db.Course.objects.create(institution=intitution)
-    offering = db.Offering.objects.create(
-        course=course,
-        start=datetime.now(),
-        end=datetime.now() + timedelta(days=100),
-        active=True
-    )
-
-    return offering
+from tests.utils import create_offering
 
 
 @pytest.mark.django_db

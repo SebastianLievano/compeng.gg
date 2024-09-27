@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
+import courses.teams.api as teams_api
 
 from . import views
 from .views_github_webhook import github_webhook
@@ -39,6 +40,8 @@ urlpatterns = [
 
     path('courses/offerings/', views.offerings),
     path('courses/<slug:slug>/', views.course),
+    path('courses/team/join/', teams_api.join_team),
+    path('courses/team/leave/', teams_api.leave_team),
 
     path('github/webhook/', github_webhook),
 
