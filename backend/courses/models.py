@@ -69,6 +69,10 @@ class Offering(models.Model):
     end = models.DateField()
     active = models.BooleanField()
     external_id = models.BigIntegerField(blank=True, null=True)
+    max_team_size = models.IntegerField()
+    team_formation_deadline = models.DateTimeField()
+    show_group_members = models.BooleanField(default=True)
+    allow_custom_names = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.name} {self.course}'
@@ -169,7 +173,6 @@ class Enrollment(models.Model):
 
     class Meta:
         unique_together = ['user', 'role']
-
 
 class Team(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
