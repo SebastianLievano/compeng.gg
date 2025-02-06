@@ -4,7 +4,7 @@ import Navbar from "@/app/components/navbar";
 import LoginRequired from "@/app/lib/login-required";
 import { useContext, useEffect, useState } from "react";
 import QuizDisplay, { QuizProps } from "../quiz-display";
-import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
+import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionViewMode, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
 import { Card } from "primereact/card";
 import { QuestionDisplay } from "../question-display";
 import { fetchApi } from "@/app/lib/api";
@@ -90,7 +90,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
       <h2>{quiz.name}</h2>
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
-          <QuestionDisplay {...questionData[idx]} state={state} idx={idx}/>
+          <QuestionDisplay {...questionData[idx]} state={state} idx={idx} viewMode={QuestionViewMode.INSTRUCTOR_EDIT}/>
         ))}
       </div>
 
