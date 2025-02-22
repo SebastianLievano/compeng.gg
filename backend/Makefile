@@ -14,3 +14,12 @@ run:
 
 test:
 	pipenv run pytest
+
+typecheck:
+	pipenv run mypy
+
+format:
+	pipenv run ruff format courses/quizzes
+
+lint:
+	pipenv run ruff check courses/quizzes --fix

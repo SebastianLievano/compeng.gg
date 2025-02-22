@@ -1,0 +1,29 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+django-ninja = "*"
+psycopg2 = "*"
+dj-database-url = "*"
+gunicorn = "*"
+uvicorn = "*"
+djangorestframework-simplejwt = "*"
+ruff = "*"
+mypy = "*"
+django-stubs = "*"
+djangorestframework-stubs = "*"
+pytz = "*"
+types-pytz = "*"
+pytest = "*"
+pytest-django = "*"
+pydantic-django = "*"
+python-dateutil = "*"
+types-python-dateutil = "*"
+openai = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
