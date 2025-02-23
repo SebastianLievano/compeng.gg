@@ -92,7 +92,7 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
     <div style={{ display: "flex", "flexDirection": "column", gap: "10px" }}>
       {loaded && (
         <AceEditor
-          mode="c_cpp"
+          mode="c_cpp" //Todo: Make this the languagea of the coding question
           theme="monokai"
           name="my_ace_editor"
           value={props.state.value}

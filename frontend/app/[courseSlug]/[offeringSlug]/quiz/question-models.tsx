@@ -23,13 +23,13 @@ export interface BaseQuestionData {
     idx?: number;
 }
 
-
+export type ProgrammingLanguages = "C_PP" | "C" | "PYTHON";
 
 // Question Data
 export interface CodeQuestionData extends BaseQuestionData {
     questionType: "CODE";
     starterCode: string;
-    programmingLanguage: "C_PP" | "C" | "PYTHON";
+    programmingLanguage: ProgrammingLanguages;
 }
 
 export interface SelectQuestionData extends BaseQuestionData {
