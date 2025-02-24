@@ -11,7 +11,6 @@ export type QuestionType = "CODE" | "SELECT" | "TEXT";
 export type ServerQuestionType = "CODING" | "MULTIPLE_CHOICE" | "WRITTEN_RESPONSE"
 
 export interface BaseQuestionData {
-    title?: string;
     id: string;
     quizSlug: string;
     courseSlug: string;
@@ -29,12 +28,22 @@ export type ProgrammingLanguages = "C_PP" | "C" | "PYTHON";
 export interface CodeQuestionData extends BaseQuestionData {
     questionType: "CODE";
     starterCode: string;
-    programmingLanguage: ProgrammingLanguages;
+    programmingLanguage: ProgrammingLanguages;   
+}
+
+export interface StaffCodeQuestionData extends CodeQuestionData {
+    filesToPull: string[];
+    fileToReplace: string;
+    gradingDirectory: string;
 }
 
 export interface SelectQuestionData extends BaseQuestionData {
     questionType: "SELECT";
     options: string[];
+}
+
+export interface StaffSelectQuestionData extends SelectQuestionData {
+    correctAnswerIdx: number;
 }
 
 export interface TextQuestionData extends BaseQuestionData {
@@ -43,6 +52,8 @@ export interface TextQuestionData extends BaseQuestionData {
 
 export type QuestionData = CodeQuestionData | SelectQuestionData | TextQuestionData;
 
+
+export type StaffQuestionData = StaffCodeQuestionData | StaffSelectQuestionData | TextQuestionData;
 // States
 interface BaseState<T> {
     value: T;
