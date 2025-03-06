@@ -4,11 +4,17 @@ import Navbar from "@/app/components/navbar";
 import LoginRequired from "@/app/lib/login-required";
 import { useContext, useEffect, useState } from "react";
 import QuizDisplay, { QuizProps } from "../quiz-display";
-import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
+import { BaseQuestionData, CodeQuestionData, QuestionData, QuestionProps, QuestionViewMode, QuestionState, QuestionType, SelectQuestionData, ServerToLocal, TextQuestionData } from "../question-models";
 import { Card } from "primereact/card";
 import { QuestionDisplay } from "../question-display";
 import { fetchApi } from "@/app/lib/api";
 import { JwtContext } from "@/app/lib/jwt-provider";
+import { getQuestionDataFromRaw } from "../quiz-utilities";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { Badge } from "primereact/badge";
+import { time } from "console";
+import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { Button } from "primereact/button";
 
 const now = new Date()
 const oneHourBefore = new Date(now.getTime() - 1 * 60 * 60 * 1000);
@@ -16,9 +22,7 @@ const twoHoursLater = new Date(now.getTime() + 2 * 60 * 60 * 1000); // Add 2 hou
 
 
 export default function Page({ params }: { params: { courseSlug: string, quizSlug: string } }) {
-  console.log("params", params)
   const { courseSlug, quizSlug } = params;
-  console.log(courseSlug, quizSlug)
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
 
@@ -39,6 +43,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
         name: data.title,
         courseSlug: courseSlug
       }
+      console.log("Quiz" + JSON.stringify(data, null, 2));
       setQuiz(retQuiz);
       const qData = data.questions.map((rawData) =>  getQuestionDataFromRaw(rawData, quizSlug, courseSlug));
       setQuestionData(qData);
@@ -57,6 +62,18 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     }
   }
 
+  async function submitQuiz() {
+    try {
+      const res = await fetchApi(jwt, setAndStoreJwt, `${courseSlug}/quiz/${quizSlug}/complete/`, "POST", {});
+      if (!res.ok) {
+        throw new Error("Failed to submit quiz");
+      }
+      window.location.href += `complete/`
+    } catch {
+      console.error("Failed to submit quiz");
+    }
+  }
+
   useEffect(() => {
     if (!loaded) {
       fetchQuiz();
@@ -64,15 +81,26 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     }
   }, [loaded]);
   //If quiz not found
+  if(!loaded){
+    return (
+      <LoginRequired>
+        <Navbar />
+
+        <h3 style={{ color: "yellow" }}>{`Loading quiz ${quizSlug}...`}</h3>
+      </LoginRequired>
+    )
+  }
+
   if (!quiz) {
     return (
       <LoginRequired>
         <Navbar />
 
-        <h3 style={{ color: "red" }}>{`quiz ${quizSlug} not found for course ${courseSlug}`}</h3>
+        <h3 style={{ color: "yellow" }}>{`quiz ${quizSlug} not found for course ${courseSlug}`}</h3>
       </LoginRequired>
     )
   }
+
 
   //If quiz in future
   if (quiz.startTime > now) {
@@ -84,10 +112,26 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
     )
   }
 
+  const acceptSubmit = () => {
+      submitQuiz();
+  }
+
+  const submitDialog = () => {
+    confirmDialog({
+      message: 'Are you sure you want to submit your answers?',
+      header: 'Confirmation',
+      icon: 'pi pi-exclamation-triangle',
+      defaultFocus: 'accept',
+      accept: acceptSubmit,
+      reject: () => {}
+    })
+  }
+
   return (
     <LoginRequired>
       <Navbar />
-      <h2>{quiz.name}</h2>
+      <QuizWritingHeader quiz={quiz} submitDialog={submitDialog}/>
+      <ConfirmDialog />
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
           <QuestionDisplay {...questionData[idx]} state={state} idx={idx}/>
@@ -98,36 +142,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
   );
 }
 
-function getQuestionDataFromRaw(rawData: any, quizSlug: string, courseSlug: string): any {
-  const baseData: BaseQuestionData = {
-    id: rawData.id,
-    quizSlug: quizSlug,
-    courseSlug: courseSlug,
-    prompt: rawData.prompt,
-    serverQuestionType: rawData.question_type,
-    questionType: ServerToLocal.get(rawData.question_type) as QuestionType  ?? "TEXT",
-    isMutable: true,
-    totalMarks: rawData.points
-  }
-  switch (baseData.questionType) {
-    case "CODE":
-      return {
-        ...baseData,
-        starterCode: rawData.starter_code, programmingLanguage: rawData.programming_language
-      } as CodeQuestionData
-    case "SELECT":
-      return {
-        ...baseData,
-        options: rawData.options
-      } as SelectQuestionData
-    case "TEXT":
-      return {
-        ...baseData,
-      } as TextQuestionData
-    default:
-      throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
-  }
-}
+
 
 function getStartingStateValue(questionData: QuestionData, rawData: any): any {
   switch (questionData.questionType) {
@@ -137,9 +152,63 @@ function getStartingStateValue(questionData: QuestionData, rawData: any): any {
       return (rawData.selected_answer_index) ?? -1; // Default to no option selected
     case "TEXT":
       return (rawData.response) ?? "";
+    case "MULTI_SELECT":
+      return (rawData.selected_answer_indices) ?? [];
     default:
       throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
   }
 }
 
+function QuizWritingHeader({ quiz, submitDialog }: { quiz: QuizProps, submitDialog: () => void }) {
+  return (
+    <div className="sticky_header">
+      <div style={{ display: "flex", flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <h2>{`${quiz.name}`}</h2>
+        </div>
+        <div style={{ display: "flex", flexDirection: "row", gap: "10px", alignItems: "center" }}>
+          <CountdownClock endTime={quiz.endTime} />
+          <Button label="Submit" onClick={submitDialog}/> 
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CountdownClock({ endTime }: { endTime: Date }) {
+  const [secondsLeft, setSecondsLeft] = useState<number>((endTime.getTime() - new Date().getTime()) / 1000);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSecondsLeft((endTime.getTime() - new Date().getTime()) / 1000);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [endTime]);
+
+  const formatTimer = (secondsLeft: number) => {
+    let timeString = "";
+    const totalHours = Math.floor(secondsLeft / 3600);
+    const days = Math.floor(totalHours / 24);
+    if(days > 0){
+      timeString = `${days}d `;
+    }
+    const hours = totalHours % 24;
+    if(hours > 0){
+      timeString = timeString + ` ${hours}h `;
+    }
+    const minutes = Math.floor(secondsLeft / 60) % 60;
+    const seconds = Math.floor(secondsLeft) % 60;
+    if(timeString == ""){
+      return `${minutes}:${seconds}`;
+    } else {
+      return timeString + ` ${minutes}m`;
+    }
+
+  }
+
+  return (
+    <div>
+      <Badge size="large" value={`Time Left: ${formatTimer(secondsLeft)}`} severity="secondary" />
+    </div>
+  )
+}
 
