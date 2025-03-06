@@ -8,6 +8,7 @@ import Navbar from "@/app/components/navbar";
 import GradingQuestionDisplay from "./grading-question-display";
 
 interface Question {
+    id: string;  
     prompt: string;
     points: number;
     order: number;
@@ -24,10 +25,10 @@ interface Submission {
     started_at: string;
     completed_at: string;
     answers: {
-        multiple_choice_answers: { question: string; selected_answer_index: number }[];
-        checkbox_answers: { question: string; selected_answer_indices: number[] }[];
-        coding_answers: { question: string; solution: string }[];
-        written_response_answers: { question: string; response: string }[];
+        multiple_choice_answers: { question_id: string; selected_answer_index: number; grade: number | null; comment: string | null }[];
+        checkbox_answers: { question_id: string; selected_answer_indices: number[]; grade: number | null; comment: string | null }[];
+        coding_answers: { question_id: string; solution: string; executions?: any[]; grade: number | null; comment: string | null }[];
+        written_response_answers: { question_id: string; response: string; grade: number | null; comment: string | null }[];
     };
 }
 
@@ -39,10 +40,9 @@ export default function StudentSubmissionPage() {
     const [loading, setLoading] = useState(true);
     const [gradeSubmitted, setGradeSubmitted] = useState(false);
 
-
     async function fetchQuizAndSubmission() {
         try {
-            // Fetch the full quiz (to get questions and point values)
+            
             const quizRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -53,7 +53,7 @@ export default function StudentSubmissionPage() {
             const quizData = await quizRes.json();
             setQuestions(quizData.questions);
 
-            // Fetch the student's submission
+            
             const subRes = await fetchApi(
                 jwt,
                 setAndStoreJwt,
@@ -93,31 +93,39 @@ export default function StudentSubmissionPage() {
                 {/* Render questions with answers */}
                 <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
                     {questions.map((question, idx) => {
-                        const matchingAnswer =
-                        submission?.answers.multiple_choice_answers.find((a) => a.question === question.prompt) ||
-                        submission?.answers.checkbox_answers.find((a) => a.question === question.prompt) ||
-                        submission?.answers.coding_answers.find((a) => a.question === question.prompt) ||
-                        submission?.answers.written_response_answers.find((a) => a.question === question.prompt);
-                    
+                        
+                        const matchingAnswer = submission?.answers.multiple_choice_answers.find((a) => a.question_id === question.id)
+                            || submission?.answers.checkbox_answers.find((a) => a.question_id === question.id)
+                            || submission?.answers.coding_answers.find((a) => a.question_id === question.id)
+                            || submission?.answers.written_response_answers.find((a) => a.question_id === question.id);
+
+                        const executions = submission?.answers.coding_answers.find((a) => a.question_id === question.id)?.executions || [];
+
+
                         return (
                             <GradingQuestionDisplay
                                 key={idx}
                                 idx={idx + 1}
                                 question={{
                                     ...question,
+                                    id: question.id,
                                     correct_option_index: question.correct_option_index,
                                     correct_option_indices: question.correct_option_indices,
                                 }}
                                 studentAnswer={matchingAnswer}
+                                executions={executions}
+                                grade={matchingAnswer?.grade}
+                                comment={matchingAnswer?.comment}
                             />
                         );
                     })}
                 </div>
             </div>
+
             <button
                 onClick={() => {
                     setGradeSubmitted(true);
-                    setTimeout(() => setGradeSubmitted(false), 3000); // Auto-hide after 3 seconds
+                    setTimeout(() => setGradeSubmitted(false), 3000);
                 }}
                 style={{
                     position: "fixed",
@@ -135,6 +143,7 @@ export default function StudentSubmissionPage() {
             >
                 Submit Grade
             </button>
+
             {gradeSubmitted && (
                 <div
                     style={{
@@ -167,7 +176,6 @@ export default function StudentSubmissionPage() {
                     </button>
                 </div>
             )}
-
         </>
     );
 }

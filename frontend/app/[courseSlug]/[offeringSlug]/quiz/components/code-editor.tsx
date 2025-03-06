@@ -10,6 +10,7 @@ import { fetchApi, jwtObtainPairEndpoint, apiUrl} from '@/app/lib/api';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import TestRun, { RawToTestRunProps, TestRunHeader, TestRunProps } from './test-run';
 import { Accordion, AccordionTab } from 'primereact/accordion';
+import Ide from './ide';
 
 // Set base path for other Ace dependencies
 ace.config.set('basePath', '/ace');
@@ -26,90 +27,76 @@ enum TestRunStatus {
   COMPLETE = "Complete"
 }
 
-export default function CodeEditor({ props, save }: { props: CodeQuestionProps, save: (newValue: any) => void }) {
+export default function CodeEditor({ props, includeTests }: { props: CodeQuestionProps, includeTests: boolean}) {
   const [loaded, setLoaded] = useState<boolean>(false);
   const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
   const [message, setMessage] = useState<string>("");
   const [jwt, setAndStoreJwt] = useContext(JwtContext);
   const [testStatus, setTestStatus] = useState<TestRunStatus>(TestRunStatus.NOT_RUN);
-  const [testRuns, setTestRuns] = useState<TestRunProps[]>([]);
+
+  // ✅ Convert executions to TestRunProps format
+  const [testRuns, setTestRuns] = useState<TestRunProps[]>(props.executions?.map(exec => ({
+      testResults: exec.result?.tests ?? [],
+      numPassed: exec.result?.tests?.filter(test => test.result === "OK").length ?? 0,
+      numFailed: exec.result?.tests?.filter(test => test.result !== "OK").length ?? 0,
+      stderr: exec.stderr ?? "",
+      status: exec.status ?? "ERROR",
+      time: new Date() // No timestamp provided, so defaulting to now
+  })) ?? []);
 
   useEffect(() => {
     ace.config.setModuleUrl('ace/mode/c_cpp', '/ace/mode-c_cpp.js');
     ace.config.setModuleUrl('ace/theme/monokai', '/ace/theme-monokai.js');
-    ace.config.setModuleUrl('ace/ext/language_tools', '/ace/ext-language_tools.js');
+    ace.config.setModuleUrl('ace/ext-language_tools', '/ace/ext-language_tools.js');
 
-    // Require autocomplete-related modules
     ace.require('ace/ext/language_tools');
     ace.require('ace/mode/c_cpp');
     ace.require('ace/theme/monokai');
 
     setLoaded(true);
-    
   }, []);
 
   useEffect(() => {
-    // Create a WebSocket connection
+    if (!props.isMutable) return;
+
     const ws = new WebSocket(apiUrl+`ws/${props.courseSlug}/quiz/${props.quizSlug}/run_code/${props.id}/?token=${jwt.access}`);
     setSocket(ws);
 
-    ws.onopen = () => {
-      console.log('WebSocket connection opened.');
-    };
-
+    ws.onopen = () => console.log('WebSocket connection opened.');
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       setTestStatus(TestRunStatus.COMPLETE);
       console.log('Message from server:', data);
       setMessage(JSON.stringify(data, null, 2));
-      const newResult: TestRunProps = RawToTestRunProps(JSON.stringify(data));
-      setTestRuns((testRuns) => [...testRuns, newResult]);
 
+      const newResult: TestRunProps = {
+        testResults: data.tests ?? [],
+        numPassed: data.tests?.filter(test => test.result === "OK").length ?? 0,
+        numFailed: data.tests?.filter(test => test.result !== "OK").length ?? 0,
+        stderr: data.stderr ?? "",
+        status: data.status ?? "ERROR",
+        time: new Date()
+      };
+
+      setTestRuns((prevTestRuns) => [...prevTestRuns, newResult]);
     };
 
-    ws.onclose = () => {
-      console.log('WebSocket connection closed.');
-    };
+    ws.onclose = () => console.log('WebSocket connection closed.');
+    ws.onerror = (error) => console.error('WebSocket error:', error);
 
-    ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    // Cleanup the WebSocket connection
-    return () => {
-      ws.close();
-    };
-  }, []);
+    return () => ws.close();
+  }, [props.isMutable]);
 
   async function runTests() {
-    if(socket){
-      setTestStatus(TestRunStatus.RUNNING)
-      socket.send(JSON.stringify({solution: props.state.value, questionId: props.id}));
+    if (socket) {
+      setTestStatus(TestRunStatus.RUNNING);
+      socket.send(JSON.stringify({ solution: props.state.value, questionId: props.id }));
     }
   }
 
   return (
     <div style={{ display: "flex", "flexDirection": "column", gap: "10px" }}>
-      {loaded && (
-        <AceEditor
-          mode="c_cpp"
-          theme="monokai"
-          name="my_ace_editor"
-          value={props.state.value}
-          onChange={props.state.setValue}
-          fontSize={14}
-          showPrintMargin={false}
-          showGutter={true}
-          highlightActiveLine={true}
-          style={{ width: '100%', height: '400px' }}
-          // Enable autocomplete features
-          setOptions={{
-            enableBasicAutocompletion: true,
-            enableLiveAutocompletion: true,
-            enableSnippets: true,
-          }}
-        />
-      )}
+      <Ide language={props.programmingLanguage} value={props.state.value} onChange={props.state.setValue} isMutable={props.isMutable} state={props.state}  />
       <Accordion>
         {testRuns.map((testRun: TestRunProps, index) => (
           <AccordionTab header={TestRunHeader(testRun)} key={index}>
@@ -117,13 +104,13 @@ export default function CodeEditor({ props, save }: { props: CodeQuestionProps, 
           </AccordionTab>
         ))}
       </Accordion>
-      {props.isMutable ? (
+
+      {props.isMutable && (
         <div style={{ position: 'relative', display: "flex", flexDirection: "row-reverse" }}>
           <span></span>
-          <Button label="Run Tests" size="small" onClick={runTests}/>
+          <Button label="Run Tests" size="small" onClick={runTests} />
         </div>
-      ) : null}
+      )}
     </div>
   );
 }
-

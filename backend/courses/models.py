@@ -346,8 +346,9 @@ class QuizQuestionBaseModel(models.Model):
 
 
 class QuizAnswerBaseModel(models.Model):
-
     last_updated_at = models.DateTimeField()
+    comment = models.TextField(null=True, blank=True)
+    grade = models.PositiveIntegerField(null=True, blank=True)
 
     class Meta:
         abstract = True
