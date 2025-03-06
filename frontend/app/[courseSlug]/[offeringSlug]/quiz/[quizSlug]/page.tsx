@@ -134,7 +134,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
       <ConfirmDialog />
       <div style={{ display: "flex", gap: "10px", width: "100%", flexDirection: "column" }}>
         {questionStates.map((state, idx) => (
-          <QuestionDisplay {...questionData[idx]} state={state} idx={idx} viewMode={QuestionViewMode.INSTRUCTOR_EDIT}/>
+          <QuestionDisplay {...questionData[idx]} state={state} idx={idx}/>
         ))}
       </div>
 
@@ -152,6 +152,8 @@ function getStartingStateValue(questionData: QuestionData, rawData: any): any {
       return (rawData.selected_answer_index) ?? -1; // Default to no option selected
     case "TEXT":
       return (rawData.response) ?? "";
+    case "MULTI_SELECT":
+      return (rawData.selected_answer_indices) ?? [];
     default:
       throw new Error(`Unsupported question type: ${JSON.stringify(questionData)}`);
   }
