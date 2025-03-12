@@ -46,14 +46,14 @@ export interface Team {
 }
 
 export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
-    const [jwt, setAndStoreJwt] = useContext(JwtContext);
-    const { courseSlug, offeringSlug } = props;
-    const [teams, setTeams] = useState<Team[]>([]);
-    const [userMembership, setUserMembership] = useState<
-        UserMembership | undefined
-    >(undefined);
-    const [userName, setUserName] = useState<string>('');
-    const [loading, setLoading] = useState<boolean>(true);
+	const [jwt, setAndStoreJwt] = useContext(JwtContext);
+	const { courseSlug, offeringSlug } = props;
+	const [teams, setTeams] = useState<Team[]>([]);
+	const [userMembership, setUserMembership] = useState<
+		UserMembership | undefined
+	>(undefined);
+	const [userName, setUserName] = useState<string>("");
+	const [loading, setLoading] = useState<boolean>(true);
 
     // Fetch username on component mount
     useEffect(() => {
