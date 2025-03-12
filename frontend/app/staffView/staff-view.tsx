@@ -1,13 +1,13 @@
-import { TabMenu } from "primereact/tabmenu";
-import { Lab } from "../[courseSlug]/[offeringSlug]/page";
+import { TabMenu } from 'primereact/tabmenu';
+import { Lab } from '../[courseSlug]/[offeringSlug]/page';
 import { useState } from 'react';
-import PrimeWrapper from "../components/primeWrapper";
+import PrimeWrapper from '../components/primeWrapper';
 import 'primeicons/primeicons.css';
-import { Button } from "primereact/button";
-import StudentTeamViewTab from "../studentView/components/student-team-view-tab";
-import StaffTeamViewTab from "./components/staff-team-view-tab";
-import StaffCourseSettingsTab from "./components/staff-course-settings-tab";
-import StaffQuizViewTab from "./components/staff-quiz-view-tab";
+import { Button } from 'primereact/button';
+import StudentTeamViewTab from '../studentView/components/student-team-view-tab';
+import StaffTeamViewTab from './components/staff-team-view-tab';
+import StaffCourseSettingsTab from './components/staff-course-settings-tab';
+import StaffQuizViewTab from './components/staff-quiz-view-tab';
 
 export interface StaffViewProps {
     courseName: string;
@@ -30,7 +30,7 @@ export default function StaffView(props: StaffViewProps){
         { label: 'Teams', icon: 'pi pi-spin pi-users'},
         { label: 'Quizzes', icon: 'pi pi-spin pi-question'},
         // test
-    ]
+    ];
 
     return (
         <>
@@ -44,29 +44,29 @@ export default function StaffView(props: StaffViewProps){
                 <DisplayCourseTab idx={idx} courseSlug={courseSlug} offeringSlug={offeringSlug}/>
             </PrimeWrapper>
         </>
-    )
+    );
 }
 
 function DisplayCourseTab({idx, courseSlug, offeringSlug}){
     if(idx == 0){
-        return <StaffCourseSettingsTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+        return <StaffCourseSettingsTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>;
     }
     
     if(idx == 2){
-        return <StaffTeamViewTab  courseSlug={courseSlug}/>
+        return <StaffTeamViewTab courseSlug={courseSlug}/>;
     }
 
     if (idx == 3){
-        return <StaffQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>
+        return <StaffQuizViewTab courseSlug={courseSlug} offeringSlug={offeringSlug}/>;
     }
 
     return (
         <WIP/>
-    )
+    );
 }
 
 function WIP(){
     return (
         <h4>This is a work in progress</h4>
-    )
+    );
 }
