@@ -150,4 +150,3 @@ def get_quiz_images_from_question_list(questions):
         images.append(ret_val)
     return images
     
-    

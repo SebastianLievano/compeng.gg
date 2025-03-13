@@ -29,7 +29,8 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                     courseSlug: props.courseSlug,
                     offeringSlug: props.offeringSlug,
                     startTime: new Date(quiz.start_unix_timestamp*1000),
-                    endTime: new Date(quiz.end_unix_timestamp*1000)
+                    endTime: new Date(quiz.end_unix_timestamp*1000),
+                    releaseTime: new Date(quiz.release_unix_timestamp*1000),
                 });
             });
             setQuizs(retQuizs);

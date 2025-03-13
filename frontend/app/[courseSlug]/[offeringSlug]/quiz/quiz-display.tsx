@@ -13,6 +13,7 @@ export interface QuizProps {
     quizSlug: string;
     startTime: Date;
     endTime: Date;
+    releaseTime: Date;
     grade?: number;
 }
 

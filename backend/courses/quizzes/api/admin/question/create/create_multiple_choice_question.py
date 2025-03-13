@@ -9,6 +9,7 @@ from courses.quizzes.api.admin.utils import (
     validate_user_is_ta_or_instructor_in_course,
     CustomException,
 )
+from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 
 
 @api_view(["POST"])
@@ -45,6 +46,7 @@ def create_multiple_choice_question(request, course_slug: str, quiz_slug: str):
         correct_option_index=correct_option_index,
         quiz=quiz,
     )
+    update_quiz_total_points(course_slug, quiz_slug)
 
     return Response(
         status=status.HTTP_200_OK, data={"question_id": multiple_choice_question.id}

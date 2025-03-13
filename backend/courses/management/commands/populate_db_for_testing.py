@@ -26,8 +26,8 @@ class Command(BaseCommand):
         mock_course = db.Course.objects.create(
             institution=mock_institution,
             slug="ece344",
-            name="ECE344",
-            title="Operating Systems"
+            title="ECE344",
+            name="Operating Systems"
         )
 
         now_datetime = timezone.now()

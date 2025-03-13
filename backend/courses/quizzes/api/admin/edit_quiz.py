@@ -3,7 +3,7 @@ from rest_framework import permissions, status
 from rest_framework.response import Response
 import courses.models as db
 from courses.quizzes.api.admin.schema import EditQuizSerializer
-
+from datetime import timezone
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
@@ -19,3 +19,13 @@ def edit_quiz(request, course_slug: str, quiz_slug: str):
     serializer.save()
 
     return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(["POST"])
+@permission_classes([permissions.IsAuthenticated])
+def release_quiz_now(request, course_slug: str, quiz_slug: str):
+    quiz = db.Quiz.objects.get(slug=quiz_slug, offering__course__slug=course_slug)
+    quiz.release_answers_at = timezone.now()
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+    

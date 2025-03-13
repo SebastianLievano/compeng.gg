@@ -148,5 +148,9 @@ def get_student_quiz_submission(
         "total_points": quiz.total_points,
         "answers": answer_data,
     }
+    
+    print(
+        "Submission Data:", submission
+    )
 
     return Response(data=submission_data, status=status.HTTP_200_OK)

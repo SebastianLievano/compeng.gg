@@ -7,7 +7,7 @@ from courses.quizzes.api.admin.utils import (
     validate_user_is_ta_or_instructor_in_course,
     CustomException,
 )
-
+from courses.quizzes.api.admin.question.total_points import update_quiz_total_points
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])
@@ -51,5 +51,6 @@ def create_coding_question(request, course_slug: str, quiz_slug: str):
         grading_file_directory=grading_file_directory,
         quiz=quiz,
     )
+    update_quiz_total_points(course_slug, quiz_slug)
 
     return Response(status=status.HTTP_200_OK, data={"question_id": coding_question.id})
