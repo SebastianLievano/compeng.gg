@@ -7,6 +7,7 @@ from typing import Optional, Union, Type
 from django.utils import timezone
 from django.forms.models import model_to_dict
 
+
 def get_existing_answer_object(
     answer_model: Union[
         Type[db.MultipleChoiceAnswer],
@@ -91,6 +92,7 @@ def get_quiz_or_error_response(
         )
 
     return quiz
+
 
 def get_question_from_id_and_type(id: str, type: str):
     if type == "multiple_choice":
