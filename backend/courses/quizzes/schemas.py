@@ -203,7 +203,9 @@ class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
 class CourseQuizzesListSerializer(serializers.ModelSerializer):
     start_unix_timestamp = serializers.SerializerMethodField()
     end_unix_timestamp = serializers.SerializerMethodField()
-    release_unix_timestamp = serializers.Serializer
+    release_unix_timestamp = serializers.SerializerMethodField()
+    
+    
 
     class Meta:
         model = db.Quiz
