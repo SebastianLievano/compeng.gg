@@ -41,15 +41,11 @@ function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
     );
 }
 
-function releaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
-    
-}
-
-function CreateStudentQuizAccommodationButton({ quizProps }: { quizProps: StaffQuizProps }) {
+function ManageStudentQuizAccommodationsButton({ quizProps }: { quizProps: StaffQuizProps }) {
     return (
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'row-reverse' }}>
             <Link href={`/${quizProps.courseSlug}/${quizProps.offeringSlug}/quiz/${quizProps.quizSlug}/accommodations/`}>
-                <Button label="Create Student Accommodation" size="small" />
+                <Button label="Manage Student Accommodations" size="small" />
             </Link>
         </div>
     );
@@ -102,7 +98,7 @@ function OngoingQuizDisplay(props: StaffQuizProps) {
                 <Link href={`/${props.courseSlug}/${props.offeringSlug}/quiz/edit/${props.quizSlug}/`}>
                     <Button label="Edit Quiz" size="small" />
                 </Link>
-                <CreateStudentQuizAccommodationButton quizProps={props} />
+                <ManageStudentQuizAccommodationsButton quizProps={props} />
                 <StaffQuizButton quizProps={props} />
             </div>
         );
