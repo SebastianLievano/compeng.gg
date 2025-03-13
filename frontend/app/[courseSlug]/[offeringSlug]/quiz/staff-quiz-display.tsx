@@ -41,6 +41,10 @@ function StaffQuizButton({ quizProps }: { quizProps: StaffQuizProps }) {
     );
 }
 
+// function releaseNowButton({ quizProps }: { quizProps: StaffQuizProps }) {
+    
+// }
+
 function ManageStudentQuizAccommodationsButton({ quizProps }: { quizProps: StaffQuizProps }) {
     return (
         <div style={{ position: 'relative', display: 'flex', flexDirection: 'row-reverse' }}>
