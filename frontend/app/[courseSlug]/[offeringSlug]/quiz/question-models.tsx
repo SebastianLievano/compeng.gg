@@ -29,6 +29,7 @@ export interface BaseQuestionData {
     isMutable: boolean;
     questionType: QuestionType;
     serverQuestionType: ServerQuestionType;
+    imageUrls: string[];
     idx?: number;
 }
 
