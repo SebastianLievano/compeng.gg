@@ -69,6 +69,7 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             totalMarks: 0,
             isMutable: true,
             questionType: 'TEXT',
+            renderPromptAsLatex: false,
             serverQuestionType: 'WRITTEN_RESPONSE'
         } as StaffQuestionData;
         setQuestionData(prevData => [...prevData, newQuestion]);

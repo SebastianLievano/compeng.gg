@@ -71,7 +71,7 @@ class StudentCanViewQuiz(IsAuthenticated):
         if quiz.starts_at > timezone.now():
             raise PermissionDenied("Quiz has not started yet")
 
-        if quiz.ends_at < timezone.now():
+        if (quiz.ends_at < timezone.now() and not quiz.content_viewable_after_submission) or quiz.release_answers_at > timezone.now():
             raise PermissionDenied("Quiz has already ended")
 
         return True

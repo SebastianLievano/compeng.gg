@@ -39,7 +39,9 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
                 endTime: new Date(data.end_unix_timestamp * 1000),
                 quizSlug: quizSlug,
                 name: data.title,
-                courseSlug: courseSlug
+                courseSlug: courseSlug,
+                releaseTime: new Date(data.release_unix_timestamp * 1000),
+                grade: data.grade
             };
             console.log('Quiz' + JSON.stringify(data, null, 2));
             setQuiz(retQuiz);
@@ -105,6 +107,19 @@ export default function Page({ params }: { params: { courseSlug: string, quizSlu
             <LoginRequired>
                 <Navbar />
                 <QuizDisplay {...quiz} />
+            </LoginRequired>
+        );
+    }
+    console.log('Quiz end time: ' + quiz.endTime);
+    console.log('Now: ' + now);
+
+    //if quiz has ended
+    if (quiz.endTime < now) {
+        return (
+            <LoginRequired>
+                <Navbar />
+                <QuizDisplay {...quiz} />
+                <h3 style={{ color: 'yellow' }}>{`Quiz ${quizSlug} has ended`}</h3>
             </LoginRequired>
         );
     }

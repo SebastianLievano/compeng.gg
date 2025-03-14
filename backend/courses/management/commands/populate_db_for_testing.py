@@ -108,7 +108,8 @@ class Command(BaseCommand):
             title="Quiz Title",
             visible_at=now_datetime,
             starts_at=now_datetime,
-            ends_at=now_datetime + timedelta(days=365),
+            ends_at=now_datetime + timedelta(days=1),
+            release_answers_at=now_datetime + timedelta(days=1),
             repository=mock_repository,
             total_points=100
         )

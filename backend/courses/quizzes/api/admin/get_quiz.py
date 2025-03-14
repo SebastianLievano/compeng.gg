@@ -16,6 +16,7 @@ def get_quiz(request, course_slug: str, quiz_slug: str):
     quiz_data["starts_at"] = int(quiz_data["starts_at"].timestamp())
     quiz_data["ends_at"] = int(quiz_data["ends_at"].timestamp())
     quiz_data["visible_at"] = int(quiz_data["visible_at"].timestamp())
+    quiz_data["release_at"] = int(quiz_data["release_answers_at"].timestamp())
     
     quiz_data["offering_title"] = f"{quiz.offering.course.title} - {quiz.offering.name}"
 
