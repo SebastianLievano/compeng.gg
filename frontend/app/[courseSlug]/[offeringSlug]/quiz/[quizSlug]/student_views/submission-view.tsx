@@ -90,31 +90,29 @@ export default function ViewOnlyQuizSubmission() {
                         >
                             <strong>Student Answer:</strong>
                             <div style={{ marginTop: '10px' }}>
-                                {question.options ? (
-                                    question.correct_option_indices ? (
+                                    {question.question_type === 'CHECKBOX' ? (
                                         <CheckboxEditor
                                             props={{
                                                 state: {
                                                     value: matchingAnswer?.selected_answer_indices || [],
                                                     setValue: () => {},
                                                 },
-                                                options: question.options,
+                                                options: question.options || [],
                                             }}
                                             save={() => {}}
                                         />
-                                    ) : (
+                                    ) : question.question_type === 'MULTIPLE_CHOICE' ? (
                                         <SelectEditor
                                             props={{
                                                 state: {
                                                     value: matchingAnswer?.selected_answer_index ?? -1,
                                                     setValue: () => {},
                                                 },
-                                                options: question.options,
+                                                options: question.options || [],
                                             }}
                                             save={() => {}}
                                         />
-                                    )
-                                ) : question.programming_language ? (
+                                    ) : question.question_type === 'CODING' ? (
                                     <CodeEditor
                                         props={{
                                             id: `code-question-${idx}`,
