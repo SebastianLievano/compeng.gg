@@ -97,9 +97,11 @@ urlpatterns = [
     
     path('quizzes/admin/<slug:course_slug>/', quizzes_api.admin_list_quizzes_for_course),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/', quizzes_api.get_quiz_submissions),
-    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/<int:student_id>/", quizzes_api.get_student_quiz_submission),
+    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submissions/<int:student_id>/", quizzes_api.get_student_quiz_submission_staff),
     path("quizzes/admin/<slug:quiz_slug>/submissions/<int:student_id>/update-question/", quizzes_api.update_submission_question),
     path("quizzes/admin/<slug:quiz_slug>/submissions/<int:student_id>/submit-grade/", quizzes_api.compute_total_grade),
+    
+    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submission/", quizzes_api.get_student_quiz_submission),
 
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/add/", quizzes_api.create_question_image),
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/delete/", quizzes_api.delete_question_image),
