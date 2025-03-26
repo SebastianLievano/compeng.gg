@@ -51,7 +51,11 @@ from courses.quizzes.api.admin.edit_quiz import edit_quiz
 from courses.quizzes.api.admin.edit_quiz import release_quiz_now
 
 
-from courses.quizzes.api.admin.get_quiz import get_quiz
+from courses.quizzes.api.admin.get_quiz import (
+    get_quiz,
+    get_quiz_info,
+)
+    
 
 from courses.quizzes.api.admin.admin_list_quizzes_for_course import (
     admin_list_quizzes_for_course,

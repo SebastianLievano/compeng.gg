@@ -35,7 +35,7 @@ export default function StudentQuizViewTab(props: StudentQuizViewProps){
                             const submissionRes = await fetchApi(
                                 jwt,
                                 setAndStoreJwt,
-                                `quizzes/admin/${props.courseSlug}/${quiz.slug}/submission/`,
+                                `quizzes/${props.courseSlug}/${quiz.slug}/submission/`,
                                 'GET'
                             );
                             if (submissionRes.ok) {

@@ -91,6 +91,8 @@ urlpatterns = [
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/edit/', quizzes_api.edit_quiz),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/release-now/', quizzes_api.release_quiz_now),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/', quizzes_api.get_quiz),
+    path('quizzes/<slug:course_slug>/<slug:quiz_slug>/info/', quizzes_api.get_quiz_info),
+
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/accommodation/create/', quizzes_api.create_quiz_accommodation),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/accommodation/delete/', quizzes_api.delete_quiz_accommodation),
     path('quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/accommodations/', quizzes_api.list_quiz_accommodations),
@@ -101,7 +103,8 @@ urlpatterns = [
     path("quizzes/admin/<slug:quiz_slug>/submissions/<int:student_id>/update-question/", quizzes_api.update_submission_question),
     path("quizzes/admin/<slug:quiz_slug>/submissions/<int:student_id>/submit-grade/", quizzes_api.compute_total_grade),
     
-    path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/submission/", quizzes_api.get_student_quiz_submission),
+    path("quizzes/<slug:course_slug>/<slug:quiz_slug>/submission/", quizzes_api.get_student_quiz_submission),
+
 
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/add/", quizzes_api.create_question_image),
     path("quizzes/admin/<slug:course_slug>/<slug:quiz_slug>/images/delete/", quizzes_api.delete_question_image),

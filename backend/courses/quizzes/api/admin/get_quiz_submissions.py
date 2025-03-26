@@ -246,7 +246,7 @@ def get_student_quiz_submission(
     }
     
     print(
-        "Submission Data:", submission
+        "Submission Data:", submission_data
     )
 
     return Response(data=submission_data, status=status.HTTP_200_OK)
