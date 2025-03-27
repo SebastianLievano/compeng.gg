@@ -64,13 +64,6 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
             .catch((error) => console.error('Failed to fetch username:', error));
     }, [jwt, setAndStoreJwt]);
 
-    // Fetch teams whenever userName is set
-    useEffect(() => {
-        if (userName) {
-            fetchTeams();
-        }
-    }, [userName]);
-
     // Fetch teams function, accessible to all parts of the file
     const fetchTeams = async () => {
         try {
@@ -103,6 +96,13 @@ export default function StudentTeamViewTab(props: StudentTeamViewTabProps) {
             setLoading(false);
         }
     };
+
+    // Fetch teams whenever userName is set
+    useEffect(() => {
+        if (userName) {
+            fetchTeams();
+        }
+    }, [userName, fetchTeams]);
 
     const joinTeam = ({ team }: { team: Team }) => {
         fetchApi(jwt, setAndStoreJwt, 'teams/join/request/', 'PATCH', {
