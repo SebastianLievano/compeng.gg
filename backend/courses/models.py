@@ -127,6 +127,13 @@ class Assignment(models.Model):
     name = models.CharField(max_length=50)
     due_date = models.DateTimeField()
     files = models.JSONField()
+    external_id = models.BigIntegerField(blank=True, null=True)
+
+    is_private_released = models.BooleanField(default=False)
+    public_total = models.FloatField(blank=True, null=True)
+    private_total = models.FloatField(blank=True, null=True)
+    overall_total = models.FloatField(blank=True, null=True)
+    external_total = models.FloatField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.offering} - {self.name}'
@@ -243,9 +250,40 @@ class AssignmentTask(models.Model):
         Task,
         on_delete=models.CASCADE,
     )
+    public_grade = models.FloatField(blank=True, null=True)
+    private_grade = models.FloatField(blank=True, null=True)
+    overall_grade = models.FloatField(blank=True, null=True)
+    before_due_date = models.BooleanField(default=True)
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.task}'
+
+class AssignmentResult(models.Model):
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+    )
+    assignment = models.ForeignKey(
+        Assignment,
+        on_delete=models.CASCADE,
+    )
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    public_grade = models.FloatField(blank=True, null=True)
+    private_grade = models.FloatField(blank=True, null=True)
+    overall_grade = models.FloatField(blank=True, null=True)
+    external_grade = models.FloatField(blank=True, null=True)
+
+    def __str__(self):
+        return f'{self.user} - {self.assignment}'
+
+    class Meta:
+        unique_together = ['user', 'assignment']
 
 class AssignmentLeaderboardEntry(models.Model):
 
@@ -294,7 +332,6 @@ class Accommodation(models.Model):
         on_delete=models.CASCADE,
     )
     due_date = models.DateTimeField()
-    max_grade = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return f'{self.user} - {self.assignment} - {self.due_date}'
