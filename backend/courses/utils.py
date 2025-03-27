@@ -1,5 +1,12 @@
 from compeng_gg.auth import get_uid
-from courses.models import Enrollment, Role, Accommodation, Assignment, AssignmentTask
+from courses.models import (
+    Accommodation,
+    Assignment,
+    AssignmentTask,
+    AssignmentResult,
+    Enrollment,
+    Role,
+)
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,6 +15,15 @@ from runner.utils import create_k8s_task
 
 from discord_app.utils import add_discord_role_for_enrollment
 from github_app.utils import add_github_team_membership_for_enrollment, create_fork_for_enrollment
+
+def is_staff(user, offering):
+    instructor_role = Role.objects.get(offering=offering, kind=Role.Kind.INSTRUCTOR)
+    ta_role = Role.objects.get(offering=offering, kind=Role.Kind.TA)
+    try:
+        Enrollment.objects.get(user=user, role__in=[instructor_role, ta_role])
+        return True
+    except Enrollment.DoesNotExist:
+        return False
 
 def has_change_for_assignment(push, assignment):
     raw_files = list(assignment.files)
@@ -40,6 +56,9 @@ def create_course_tasks(push):
     user = enrollment.user
     role = enrollment.role
     offering = role.offering
+
+    if not offering.runner_repo:
+        return
 
     assignments = []
     for assignment in offering.assignment_set.all():
@@ -155,62 +174,79 @@ def get_data_for_old_push(push):
 
     return data
 
-def get_grade_for_assignment(user, assignment):
-    from api.v0.views import get_task_result
+# Also sets AssignmentResult
+def sync_before_due_date(assignment_task):
+    task = assignment_task.task
+    if not task.head_commit:
+        return
+    head_commit = task.head_commit
+    repository = head_commit.repository
+    # TODO: check if this every returns more than one
+    received = head_commit.pushes_head.all()[0].delivery.received
+
+    user = assignment_task.user
+    assignment = assignment_task.assignment 
     due_date = assignment.due_date
-    # Look for accommodations
     try:
         accommodation = Accommodation.objects.get(
             user=user, assignment=assignment
         )
+        due_date = accommodation.due_date
     except Accommodation.DoesNotExist:
-        accommodation = None
-    assignment_grade = 0
-    tasks = []
-    for assignment_task in assignment.assignmenttask_set.filter(
-        user=user, assignment=assignment
-    ).order_by('-task__created'):
-        task = assignment_task.task
-        push = task.push
+        pass
+
+    if received <= due_date:
+        assignment_task.before_due_date = True
+    else:
+        assignment_task.before_due_date = False
+    assignment_task.save()
+
+    # Only update the assignment result if it's before the due date
+    if assignment_task.before_due_date and not assignment_task.overall_grade is None:
+        try:
+            assignment_result = AssignmentResult.objects.get(user=user, assignment=assignment)
+            if assignment_task.before_due_date and assignment_task.overall_grade > assignment_result.overall_grade:
+                assignment_result.public_grade = assignment_task.public_grade
+                assignment_result.private_grade = assignment_task.private_grade
+                assignment_result.overall_grade = assignment_task.overall_grade
+                assignment_result.task = task
+                assignment_result.save()
+        except AssignmentResult.DoesNotExist:
+            assignment_result = AssignmentResult.objects.create(
+                user=user, assignment=assignment,
+                public_grade=assignment_task.public_grade,
+                private_grade=assignment_task.private_grade,
+                overall_grade=assignment_task.overall_grade,
+                task=task,
+            )
+
+# This is called from runrunner after the task completes
+def populate_assignment_grades(task):
+    from api.v0.views import get_task_result
+    for assignment_task in task.assignmenttask_set.all():
         result = get_task_result(task)
-        grade = result['grade'] if result and 'grade' in result else None
-        if assignment.kind == Assignment.Kind.TESTS:
-            pass
-        elif assignment.kind == Assignment.Kind.LEADERBOARD:
-            speedup = result['speedup'] if result and 'speedup' in result else None
-            if speedup:
-                if speedup > 985:
-                    grade = 100
-                elif speedup > 885:
-                    grade = 98
-                elif speedup > 785:
-                    grade = 96
-                elif speedup > 685:
-                    grade = 94
-                elif speedup > 585:
-                    grade = 92
-                elif speedup > 485:
-                    grade = 90
-                elif speedup > 385:
-                    grade = 88
-                elif speedup > 285:
-                    grade = 86
-                elif speedup > 185:
-                    grade = 84
-                elif speedup > 85:
-                    grade = 82
-        on_time = push.received <= due_date
-        max_grade = 100 # TODO: This should probably come from the assign.
-        if accommodation and not on_time:
-            if push.received > accommodation.due_date:
+        if result is None or not "tests" in result:
+            continue
+        public_grade = 0.0
+        private_grade = 0.0
+        for test in result["tests"]:
+            weight = test["weight"]
+            if test["result"] != "OK":
+                # Failing a weight of 0.0 invalidates the grade.
+                if weight == 0.0:
+                    public_grade = 0.0
+                    private_grade = 0.0
+                    break
                 continue
-            if accommodation.max_grade:
-                max_grade = accommodation.max_grade
-        elif not on_time:
-            continue
-        if grade is None:
-            continue
-        grade = min(grade, max_grade)
-        if grade > assignment_grade:
-            assignment_grade = grade
-    return assignment_grade
+            if not "kind" in test or test["kind"] != "private":
+                public_grade += weight
+            else:
+                private_grade += weight
+        overall_grade = public_grade + private_grade
+        assert result["grade"] == overall_grade
+        assignment_task.public_grade = public_grade
+        assignment_task.private_grade = private_grade
+        assignment_task.overall_grade = overall_grade
+        assignment_task.save()
+
+        sync_before_due_date(assignment_task)

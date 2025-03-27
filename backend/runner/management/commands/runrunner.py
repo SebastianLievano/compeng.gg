@@ -2,7 +2,9 @@ import json
 import shlex
 import subprocess
 import sys
+import time
 
+from courses.utils import populate_assignment_grades
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from github_app.utils import get_dir, get_file
@@ -57,22 +59,38 @@ class Command(BaseCommand):
                 "mountPath": f"/workspace/{file_path}",
             })
 
-        overrides = {
+
+        data = {
+            "apiVersion": "v1",
+            "kind": "Pod",
+            "metadata": {
+                "name": pod_name,
+                "namespace": namespace,
+            },
             "spec": {
+                "containers": [
+                    {
+                        "image": image,
+                        "imagePullPolicy": "Always",
+                        "name": container_name,
+                        "command": command,
+                        "volumeMounts": volume_mounts,
+                        "resources": {
+                            "requests": {
+                                "memory": "100Mi",
+                            },
+                            "limits": {
+                                "memory": "200Mi"
+                            },
+                        },
+                    },
+                ],
                 "imagePullSecrets": [
                     {
                         "name": "docker",
                     },
                 ],
-                "containers": [
-                    {
-                        "image": image,
-                        "imagePullPolicy": "Always",
-                        "name": "runner",
-                        "command": command,
-                        "volumeMounts": volume_mounts,
-                    },
-                ],
+                "restartPolicy": "Never",
                 "volumes": [
                     {
                         "name": "github-content",
@@ -81,17 +99,48 @@ class Command(BaseCommand):
                         },
                     },
                 ],
-            }
+            },
         }
 
         p = subprocess.run(
-            [
-                "kubectl", "run", pod_name, "-q", "-i", "-t", "--rm",
-                "--image", image, "--restart=Never",
-                f"--overrides={json.dumps(overrides)}",
-            ],
+            ["kubectl", "create", "-f", "-"],
+            check=True, input=json.dumps(data), text=True
+        )
+        out_of_memory = False
+        while True:
+            p = subprocess.run(
+                ["kubectl", "get", "pod", pod_name, "-o", "json"],
+                capture_output=True, text=True,
+            )
+            output = json.loads(p.stdout)
+            status = output["status"]
+            if not "containerStatuses" in status:
+                time.sleep(0.1)
+                continue
+            state = status["containerStatuses"][0]["state"]
+            if "terminated" in state:
+                terminated = state["terminated"]
+                if "reason" in terminated and terminated["reason"] == "OOMKilled":
+                    out_of_memory = True
+                exit_code = terminated["exitCode"]
+                break
+            time.sleep(0.1)
+
+        p = subprocess.run(
+            ["kubectl", "logs", pod_name],
             capture_output=True, text=True,
         )
+        subprocess.run(
+            ["kubectl", "delete", "pod", pod_name],
+            check=True,
+        )
+
+        if out_of_memory:
+            task.result = {"error": "out-of-memory"}
+            task.status = Task.Status.FAILURE
+            task.save()
+            self.stdout.write(f'{task} failure (out-of-memory)')
+            sys.exit(0)
 
         try:
             task.result = json.loads(p.stdout)
@@ -108,10 +157,13 @@ class Command(BaseCommand):
         if p.stderr != '':
             self.stderr.write(p.stderr)
 
-        if p.returncode == 0:
+        if exit_code == 0:
             task.status = Task.Status.SUCCESS
             self.stdout.write(f'{task} success')
         else:
             task.status = Task.Status.FAILURE
             self.stdout.write(f'{task} failure')
         task.save()
+
+        if task.status == Task.Status.SUCCESS:
+            populate_assignment_grades(task)
