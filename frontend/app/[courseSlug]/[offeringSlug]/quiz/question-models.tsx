@@ -1,5 +1,8 @@
 // Base Data Classes
 
+import { TestResult } from "./components/test-result";
+import { TestRunStatus } from "./components/test-run";
+
 //To-do: align question types
 export const ServerToLocal = new Map([
     ['CODING', 'CODE'],
@@ -50,18 +53,26 @@ export interface BaseQuestionData {
 
 export type ProgrammingLanguages = 'C_PP' | 'C' | 'PYTHON';
 
-interface TestResult {
-name: string;
-result: 'OK' | 'FAIL' | string; // Adjust if there are more specific result types
-[key: string]: any; // If tests contain additional fields
-}
   
-interface CodeExecution {
+export interface CodeExecution {
 result?: {
     tests?: TestResult[];
 };
 stderr?: string;
 status?: 'OK' | 'FAIL' | 'ERROR' | string; // Adjust status types as needed
+}
+
+export function executionStatusToTestRunStatus(status: string): TestRunStatus {
+    switch (status) {
+        case 'OK':
+            return TestRunStatus.SUCCESS;
+        case 'FAIL':
+            return TestRunStatus.FAILURE;
+        case 'ERROR':
+            return TestRunStatus.ERROR;
+        default:
+            return TestRunStatus.NOT_RUN;
+    }
 }
 
 // Question Data

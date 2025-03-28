@@ -64,6 +64,7 @@ export default function WritingQuizView({ offeringSlug, courseSlug, quizSlug }: 
         setQuiz,
         setQuestionData,
         setQuestionStates,
+        offeringSlug,
     ]);    
 
     async function submitQuiz() {
