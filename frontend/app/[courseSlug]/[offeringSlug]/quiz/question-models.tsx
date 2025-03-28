@@ -115,7 +115,7 @@ export type SelectState = BaseState<number>; // For selectedIdx
 export type TextState = BaseState<string>; // For currentText
 export type MultiSelectState = BaseState<number[]>; // For selectedIdxs
 
-export type QuestionState = CodeState | SelectState | TextState;
+export type QuestionState = CodeState | SelectState | TextState | MultiSelectState;
 
 // Utility Type to Map QuestionData to State
 type QuestionTypeToStateMap = {
