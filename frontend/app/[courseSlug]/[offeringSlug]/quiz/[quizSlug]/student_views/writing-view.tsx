@@ -2,7 +2,7 @@
 
 import Navbar from '@/app/ui/navbar';
 import LoginRequired from '@/app/lib/login-required';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState, useCallback } from 'react';
 import { JwtContext } from '@/app/lib/jwt-provider';
 import { fetchApi } from '@/app/lib/api';
 import { getQuestionDataFromRaw } from '../../quiz-utilities';

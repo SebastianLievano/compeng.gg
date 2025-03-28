@@ -27,7 +27,7 @@ enum TestRunStatus {
   COMPLETE = 'Complete'
 }
 
-export default function CodeEditor({ props, includeTests }: { props: CodeQuestionProps, includeTests: boolean}) {
+export default function CodeEditor({ props }: { props: CodeQuestionProps }) {
     const [loaded, setLoaded] = useState<boolean>(false);
     const [socket, setSocket] = useState<WebSocket | undefined>(undefined);
     const [message, setMessage] = useState<string>('');

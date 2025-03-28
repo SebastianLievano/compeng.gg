@@ -50,11 +50,26 @@ export interface BaseQuestionData {
 
 export type ProgrammingLanguages = 'C_PP' | 'C' | 'PYTHON';
 
+interface TestResult {
+name: string;
+result: 'OK' | 'FAIL' | string; // Adjust if there are more specific result types
+[key: string]: any; // If tests contain additional fields
+}
+  
+interface CodeExecution {
+result?: {
+    tests?: TestResult[];
+};
+stderr?: string;
+status?: 'OK' | 'FAIL' | 'ERROR' | string; // Adjust status types as needed
+}
+
 // Question Data
 export interface CodeQuestionData extends BaseQuestionData {
     questionType: 'CODE';
     starterCode: string;
     programmingLanguage: ProgrammingLanguages;   
+    executions?: CodeExecution[];
 }
 
 export interface StaffCodeQuestionData extends CodeQuestionData {
