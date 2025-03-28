@@ -23,7 +23,7 @@ export interface Lab {
   tasks: any;
 }
 
-function getRoleEnum(role) {
+function getRoleEnum(role : string) {
     const spIdx = role.lastIndexOf(' ');
     return role.substring(spIdx+1);
 }
@@ -37,7 +37,7 @@ function Course({ params }: { params: { courseSlug: string } }) {
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [name, setName] = useState();
     const [labs, setLabs] = useState([] as Lab[]);
-    const [role, setRole] = useState();
+    const [role, setRole] = useState<string>("");
 
     // TODO: Enable navigation to this page only by instructor and TA role
     // Fetch and list all offerings for a given course in the same style and format as previous page for all courses
