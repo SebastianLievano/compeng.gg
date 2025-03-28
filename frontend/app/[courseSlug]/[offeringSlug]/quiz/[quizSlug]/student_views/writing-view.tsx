@@ -14,7 +14,7 @@ import { confirmDialog, ConfirmDialog } from 'primereact/confirmdialog';
 import { QuestionData, QuestionState, CodeQuestionData } from '../../question-models';
 import { QuizProps } from '../../quiz-display';
 
-export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: string; quizSlug: string }) {
+export default function WritingQuizView({ offeringSlug, courseSlug, quizSlug }: { offeringSlug: string; courseSlug: string; quizSlug: string }) {
     
     const [jwt, setAndStoreJwt] = useContext(JwtContext);
     const [quiz, setQuiz] = useState<QuizProps | undefined>(undefined);
@@ -34,7 +34,8 @@ export default function WritingQuizView({ courseSlug, quizSlug }: { courseSlug: 
                 name: data.title,
                 courseSlug,
                 releaseTime: new Date(data.release_unix_timestamp * 1000),
-                grade: data.grade
+                grade: data.grade,
+                offeringSlug: offeringSlug
             };
     
             setQuiz(retQuiz);
