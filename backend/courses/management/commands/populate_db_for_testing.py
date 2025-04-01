@@ -95,8 +95,8 @@ class Command(BaseCommand):
 
         mock_repository = db.Repository.objects.create(
             id=1,
-            name="reimagined-parakeet",
-            full_name="nickwood5/reimagined-parakeet",
+            name="design-demo",
+            full_name="sebastianlievano/design-demo",
             owner_content_type=mock_content_type,
             owner_id=1,
         )
