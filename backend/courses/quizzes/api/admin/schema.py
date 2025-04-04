@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 
 
+
 class CreateQuizRequestSerializer(serializers.Serializer):
     title = serializers.CharField(required=True)
     slug = serializers.SlugField(required=True)
@@ -30,6 +31,7 @@ class EditQuizRequestSerializer(serializers.Serializer):
     ends_at_timestamp = serializers.IntegerField(required=False)
 
     github_repository = serializers.CharField(required=False)
+
 
 
 class UnixTimestampField(serializers.Field):
@@ -66,6 +68,7 @@ class QuizAccommodationSerializer(serializers.ModelSerializer):
     visible_at = UnixTimestampField()
     starts_at = UnixTimestampField()
     ends_at = UnixTimestampField()
+
 
     username = serializers.SlugRelatedField(
         source="user",
@@ -113,6 +116,7 @@ class EditQuizSerializer(serializers.ModelSerializer):
     visible_at = UnixTimestampField()
     starts_at = UnixTimestampField()
     ends_at = UnixTimestampField()
+
 
     class Meta:
         model = db.Quiz

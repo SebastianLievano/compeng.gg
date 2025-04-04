@@ -415,6 +415,7 @@ def course(request, slug):
     except OfferingTeamsSettings.DoesNotExist:
         data['teams_enabled'] = False
 
+
     print(data)
     return Response(data)
 

@@ -4,6 +4,7 @@ from courses.quizzes.api.websockets import CodeRunConsumer
 from channels.routing import URLRouter
 from django.urls import path
 
+
 # TODO fix this
 """
 @pytest.mark.asyncio

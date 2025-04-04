@@ -6,15 +6,13 @@ from datetime import timedelta
 import courses.models as db
 
 
+
 class ListQuizzesForCourse(TestCasesWithUserAuth):
     def get_api_endpoint(self, course_slug: str) -> str:
         return f"/api/v0/quizzes/list/{course_slug}/"
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
-
-        
-
         now = timezone.now()
 
         quiz_1_starts_at = now + timedelta(hours=1)

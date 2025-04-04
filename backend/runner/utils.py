@@ -168,6 +168,7 @@ def create_quiz_task(coding_answer_execution):
 def create_quiz_build_runner(coding_answer_execution: course_models.CodingAnswerExecution) -> None:
     repository = coding_answer_execution.coding_answer.question.quiz.repository
 
+
     #if not repository.offering_runner.exists():
     #    print("Offering runner does not exist!")
     #    return

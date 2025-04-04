@@ -10,7 +10,9 @@ from courses.quizzes.schemas import (
     CourseQuizzesListSerializer,
 )
 from typing import Optional
+
 from courses.quizzes.api.permissions import StudentIsEnrolledInCourse
+
 
 
 @api_view(["GET"])

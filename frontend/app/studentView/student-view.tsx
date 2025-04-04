@@ -7,8 +7,6 @@ import { Button } from 'primereact/button';
 import StudentAssignmentTab from './components/student-assignment-tab';
 import StudentTeamViewTab from './components/student-team-view-tab';
 import StudentQuizViewTab from './components/student-quizzes-view-tab';
-import { Console } from 'console';
-
 
 
 export interface StudentViewProps {
@@ -31,6 +29,7 @@ export default function StudentView(props: StudentViewProps){
     if (teamsEnabled) {
         items.push({ label: 'Teams', icon: 'pi pi-users'});
     }
+
 
     return (
         <>

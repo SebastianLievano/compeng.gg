@@ -24,6 +24,7 @@ class StudentIsEnrolledInCourse(IsAuthenticated):
         return True
 
 
+
 class StudentCanViewQuiz(IsAuthenticated):
     def has_permission(self, request, view):
         if not super().has_permission(request, view):
@@ -119,6 +120,7 @@ class StudentCanViewQuizOrInstructor(StudentCanViewQuiz):
         try:
             validate_user_is_ta_or_instructor_in_course(user_id, course_slug)
             quiz_slug = view.kwargs["quiz_slug"]
+
 
             quiz = db.Quiz.objects.get(
                 slug=quiz_slug, offering__course__slug=course_slug

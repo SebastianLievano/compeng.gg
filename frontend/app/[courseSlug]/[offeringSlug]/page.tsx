@@ -41,6 +41,7 @@ function Course({ params }: { params: { courseSlug: string, offeringSlug: string
     const [role, setRole] = useState<string | undefined>(undefined);
     const [teamsEnabled, setTeamsEnabled] = useState<boolean>(false);
 
+
     useEffect(() => {
         async function fetchLabs() {
             try {
