@@ -194,7 +194,6 @@ class QuizSerializer(serializers.ModelSerializer):
         written_response_questions = quiz.writtenresponsequestions
         coding_questions = quiz.codingquestions
 
-
         serialized_multiple_choice_questions = list(
             StudentMultipleChoiceQuestionSerializer(
                 multiple_choice_questions, many=True, context=self.context
@@ -218,7 +217,6 @@ class QuizSerializer(serializers.ModelSerializer):
                 coding_questions, many=True, context=self.context
             ).data
         )
-
 
         all_questions = list(
             serialized_multiple_choice_questions
@@ -261,14 +259,14 @@ class AnswerCodingQuestionRequestSerializer(serializers.Serializer):
     solution = serializers.CharField(required=True)
 
 
-
 def validate_list_is_set(value: List[Any]) -> None:
     if value is None:
         return None
 
     if len(value) != len(set(value)):
-
-
+        raise serializers.ValidationError(
+            "Input list must not contain duplicate values"
+        )
 
 
 class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):

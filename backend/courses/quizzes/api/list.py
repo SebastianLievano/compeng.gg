@@ -14,7 +14,6 @@ from typing import Optional
 from courses.quizzes.api.permissions import StudentIsEnrolledInCourse
 
 
-
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def list_all(request) -> Response:

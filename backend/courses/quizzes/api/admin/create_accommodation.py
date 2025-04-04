@@ -19,4 +19,3 @@ def create_quiz_accommodation(request, course_slug: str, quiz_slug: str):
     instance = serializer.save()
 
     return Response(status=status.HTTP_200_OK, data={"accommodation_id": instance.id})
-
