@@ -1,8 +1,10 @@
 from tests.utils import TestCasesWithUserAuth
 from django.utils import timezone
-from tests.utils import create_quiz
+from tests.utils import create_quiz, create_enrollment
 from rest_framework import status
 from datetime import timedelta
+import courses.models as db
+
 
 
 class ListQuizzesForCourse(TestCasesWithUserAuth):
@@ -11,7 +13,6 @@ class ListQuizzesForCourse(TestCasesWithUserAuth):
 
     def test_happy_path(self):
         requesting_user_id = self.user.id
-
         now = timezone.now()
 
         quiz_1_starts_at = now + timedelta(hours=1)

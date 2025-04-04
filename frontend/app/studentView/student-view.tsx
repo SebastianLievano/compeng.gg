@@ -9,24 +9,27 @@ import StudentTeamViewTab from './components/student-team-view-tab';
 import StudentQuizViewTab from './components/student-quizzes-view-tab';
 
 
-
 export interface StudentViewProps {
     courseName: string;
     labs: Lab[];
     courseSlug: string;
     offeringSlug: string;
+    teamsEnabled: boolean;
 }
 
 export default function StudentView(props: StudentViewProps){
-    const {courseName, labs, courseSlug, offeringSlug} = props;
+    const {courseName, labs, courseSlug, offeringSlug, teamsEnabled} = props;
 
     const [idx, setIdx] = useState<number>(0);
-    const items = [
+    var items = [
         { label: 'Assignments', icon: 'pi pi-list-check'},
         { label: 'Exercises', icon: 'pi pi-check-circle'},
         { label: 'Quizzes', icon: 'pi pi-pencil'},
-        { label: 'Teams', icon: 'pi pi-users'}
     ];
+    if (teamsEnabled) {
+        items.push({ label: 'Teams', icon: 'pi pi-users'});
+    }
+
 
     return (
         <>

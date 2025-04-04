@@ -1,7 +1,9 @@
 from rest_framework import serializers
 import courses.models as db
-from datetime import datetime
+from datetime import datetime, tzinfo
 from django.contrib.auth.models import User
+from django.utils import timezone
+
 
 
 class CreateQuizRequestSerializer(serializers.Serializer):
@@ -31,25 +33,42 @@ class EditQuizRequestSerializer(serializers.Serializer):
     github_repository = serializers.CharField(required=False)
 
 
-class UnixTimestampDateTimeField(serializers.DateTimeField):
-    """
-    A custom field that accepts/outputs Unix timestamps.
-    """
 
-    def to_internal_value(self, value: int):
+class UnixTimestampField(serializers.Field):
+    def to_representation(self, value):
         """
-        Parse the incoming integer timestamp and convert to a datetime.
+        Convert the datetime object (value) into a Unix timestamp (int).
         """
-        local_tz = datetime.now().astimezone().tzinfo
-        dt = datetime.fromtimestamp(int(value), tz=local_tz)
+        if value is None:
+            return None
+        # Ensure the datetime is in UTC before converting.
+        # If `value` is timezone-aware, .timestamp() returns the UTC timestamp.
+        # If it's naive, it is assumed to be local time.
+        return int(value.timestamp())
 
-        return dt
+    def to_internal_value(self, data):
+        """
+        Convert the Unix timestamp (data) into a datetime object.
+        """
+        try:
+            # Convert data to float (in case it comes as a string or float)
+            print(data)
+            timestamp = float(data)
+            # Create a datetime object from the timestamp in UTC.
+
+            local_tz = timezone.now().tzinfo
+            dt = datetime.fromtimestamp(timestamp, tz=local_tz)
+            return dt
+        except Exception as e:
+            print(e)
+            raise serializers.ValidationError("Invalid timestamp provided.")
 
 
 class QuizAccommodationSerializer(serializers.ModelSerializer):
-    visible_at = UnixTimestampDateTimeField()
-    starts_at = UnixTimestampDateTimeField()
-    ends_at = UnixTimestampDateTimeField()
+    visible_at = UnixTimestampField()
+    starts_at = UnixTimestampField()
+    ends_at = UnixTimestampField()
+
 
     username = serializers.SlugRelatedField(
         source="user",
@@ -93,10 +112,11 @@ class QuizAccommodationListItemSerializer(serializers.ModelSerializer):
 
 
 class EditQuizSerializer(serializers.ModelSerializer):
-    releases_at = UnixTimestampDateTimeField()
-    visible_at = UnixTimestampDateTimeField()
-    starts_at = UnixTimestampDateTimeField()
-    ends_at = UnixTimestampDateTimeField()
+    releases_at = UnixTimestampField()
+    visible_at = UnixTimestampField()
+    starts_at = UnixTimestampField()
+    ends_at = UnixTimestampField()
+
 
     class Meta:
         model = db.Quiz

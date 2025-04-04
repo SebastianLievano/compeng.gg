@@ -5,6 +5,26 @@ from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
 
 
+class StudentIsEnrolledInCourse(IsAuthenticated):
+    def has_permission(self, request, view):
+        if not super().has_permission(request, view):
+            return False
+
+        user_id = request.user.id
+        course_slug = view.kwargs.get("course_slug")
+
+        if not db.Enrollment.objects.filter(
+            role__kind=db.Role.Kind.STUDENT,
+            role__offering__course__slug=course_slug,
+            role__offering__active=True,
+            user_id=user_id,
+        ).exists():
+            raise PermissionDenied("Student is not enrolled in this course")
+
+        return True
+
+
+
 class StudentCanViewQuiz(IsAuthenticated):
     def has_permission(self, request, view):
         if not super().has_permission(request, view):
@@ -95,15 +115,12 @@ class StudentCanViewQuizOrInstructor(StudentCanViewQuiz):
     def has_permission(self, request, view):
         user_id = request.user.id
 
-        course_slug = view.kwargs.get("course_slug")
+        course_slug = view.kwargs["course_slug"]
 
         try:
             validate_user_is_ta_or_instructor_in_course(user_id, course_slug)
-            quiz_slug = view.kwargs.get("quiz_slug")
+            quiz_slug = view.kwargs["quiz_slug"]
 
-            # Return early if the quiz slug is not for a specific quiz
-            if quiz_slug is None:
-                return True
 
             quiz = db.Quiz.objects.get(
                 slug=quiz_slug, offering__course__slug=course_slug

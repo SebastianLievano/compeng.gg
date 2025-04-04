@@ -11,19 +11,8 @@ from courses.quizzes.schemas import (
 )
 from typing import Optional
 
+from courses.quizzes.api.permissions import StudentIsEnrolledInCourse
 
-def query_quizzes(user_id: int, filter_params: Optional[Q] = Q()) -> QuerySet[db.Quiz]:
-    return db.Quiz.objects.filter(
-        Q(
-            offering__in=Subquery(
-                db.Enrollment.objects.filter(user_id=user_id).values_list(
-                    "role__offering"
-                )
-            ),
-            visible_at__lt=timezone.now(),
-        )
-        & filter_params
-    ).order_by("starts_at", "-ends_at")
 
 
 @api_view(["GET"])
@@ -31,16 +20,30 @@ def query_quizzes(user_id: int, filter_params: Optional[Q] = Q()) -> QuerySet[db
 def list_all(request) -> Response:
     user_id = request.user.id
 
-    all_quizzes = query_quizzes(user_id=user_id)
+    student_enrollments = db.Enrollment.objects.filter(
+        role__kind=db.Role.Kind.STUDENT,
+        user_id=user_id,
+    ).values_list("role__offering", flat=True)
+
+    all_quizzes = db.Quiz.objects.filter(
+        offering__active=True,
+        offering__in=student_enrollments,
+    ).order_by("starts_at", "-ends_at")
 
     return Response(data=AllQuizzesListSerializer(all_quizzes, many=True).data)
 
 
 @api_view(["GET"])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([StudentIsEnrolledInCourse])
 def list_for_course(request, course_slug: str) -> Response:
     user_id = request.user.id
 
-    filter_params = Q(offering__course__slug=course_slug)
-    course_quizzes = query_quizzes(user_id=user_id, filter_params=filter_params)
+    # filter_params = Q(offering__course__slug=course_slug)
+    # course_quizzes = query_quizzes(user_id=user_id, filter_params=filter_params)
+
+    course_quizzes = db.Quiz.objects.filter(
+        offering__course__slug=course_slug,
+        offering__active=True,
+    ).order_by("starts_at", "-ends_at")
+
     return Response(data=CourseQuizzesListSerializer(course_quizzes, many=True).data)
