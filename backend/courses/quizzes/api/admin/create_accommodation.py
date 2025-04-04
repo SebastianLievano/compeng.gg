@@ -16,8 +16,6 @@ def create_quiz_accommodation(request, course_slug: str, quiz_slug: str):
     if not serializer.is_valid():
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    serializer.save()
+    instance = serializer.save()
 
-    return Response(
-        status=status.HTTP_200_OK, data={"accommodation_id": serializer.instance.id}
-    )
+    return Response(status=status.HTTP_200_OK, data={"accommodation_id": instance.id})

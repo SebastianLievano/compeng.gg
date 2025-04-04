@@ -194,21 +194,29 @@ class QuizSerializer(serializers.ModelSerializer):
         written_response_questions = quiz.writtenresponsequestions
         coding_questions = quiz.codingquestions
 
-        serialized_multiple_choice_questions = StudentMultipleChoiceQuestionSerializer(
-            multiple_choice_questions, many=True, context=self.context
-        ).data
+        serialized_multiple_choice_questions = list(
+            StudentMultipleChoiceQuestionSerializer(
+                multiple_choice_questions, many=True, context=self.context
+            ).data
+        )
 
-        serialized_checkbox_questions = StudentCheckboxQuestionSerializer(
-            checkbox_questions, many=True, context=self.context
-        ).data
+        serialized_checkbox_questions = list(
+            StudentCheckboxQuestionSerializer(
+                checkbox_questions, many=True, context=self.context
+            ).data
+        )
 
-        serialized_written_response_questions = WrittenResponseQuestionSerializer(
-            written_response_questions, many=True, context=self.context
-        ).data
+        serialized_written_response_questions = list(
+            WrittenResponseQuestionSerializer(
+                written_response_questions, many=True, context=self.context
+            ).data
+        )
 
-        serialized_coding_questions = StudentCodingQuestionSerializer(
-            coding_questions, many=True, context=self.context
-        ).data
+        serialized_coding_questions = list(
+            StudentCodingQuestionSerializer(
+                coding_questions, many=True, context=self.context
+            ).data
+        )
 
         all_questions = list(
             serialized_multiple_choice_questions
@@ -251,16 +259,14 @@ class AnswerCodingQuestionRequestSerializer(serializers.Serializer):
     solution = serializers.CharField(required=True)
 
 
-def validate_list_is_set(input_list: Optional[List[int]]) -> Optional[List[int]]:
-    if input_list is None:
+def validate_list_is_set(value: List[Any]) -> None:
+    if value is None:
         return None
 
-    if len(input_list) != len(set(input_list)):
+    if len(value) != len(set(value)):
         raise serializers.ValidationError(
             "Input list must not contain duplicate values"
         )
-
-    return input_list
 
 
 class AnswerCheckboxQuestionRequestSerializer(serializers.Serializer):
